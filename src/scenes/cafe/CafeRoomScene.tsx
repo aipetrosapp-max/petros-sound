@@ -62,7 +62,11 @@ export const WESTERN_SALOON_PROP_GLBS = {
   guitar: '/models/cafe/props/Ukulele_01.glb',
   woodenStool: '/models/cafe/props/wooden_stool_01.glb',
   chandelier: '/models/cafe/props/Chandelier_03.glb',
-  lantern: '/models/cafe/props/Lantern_01.glb'
+  lantern: '/models/cafe/props/Lantern_01.glb',
+  heroBar: '/models/cafe/hero/saloon_bar_counter.glb',
+  heroPiano: '/models/cafe/hero/saloon_upright_piano.glb',
+  heroPokerTable: '/models/cafe/hero/saloon_poker_table.glb',
+  heroWagonWheel: '/models/cafe/hero/saloon_wagon_wheel_chandelier.glb'
 } as const;
 
 const EMPTY_MOCAP_CLIPS: THREE.AnimationClip[] = [];
@@ -971,7 +975,7 @@ function SaloonPokerAndWhiskeyTable({
 }) {
   const seatRadius = 0.86;
   const smokeTex = useMemo(() => createSoftSmokePuffTexture(), []);
-  const tableGltf = useGLTF(WESTERN_SALOON_PROP_GLBS.roundTable, DRACO_DECODER_URL);
+  const tableGltf = useGLTF(WESTERN_SALOON_PROP_GLBS.heroPokerTable, DRACO_DECODER_URL);
   const chairGltf = useGLTF(WESTERN_SALOON_PROP_GLBS.saloonChair, DRACO_DECODER_URL);
 
   const tableObj = useMemo(() => clonePropGlb(tableGltf.scene), [tableGltf.scene]);
@@ -1580,7 +1584,7 @@ function SaloonArchitectureAndProps({
         ))}
       </group>
 
-      {/* 1899 Dark-Wood Upright Saloon Piano on Left Stage Facing the Pianist */}
+      {/* 1899 Bespoke High-Fidelity Upright Saloon Piano on Left Stage Facing the Pianist */}
       <group
         position={[-1.98, 0.32, -4.12]}
         rotation={[0, -Math.PI / 2 + 0.22, 0]}
@@ -1589,15 +1593,16 @@ function SaloonArchitectureAndProps({
           onInteractHotspot?.('toggle_play');
         }}
       >
-        <RoundedBox args={[1.38, 1.26, 0.52]} radius={0.03} smoothness={3} position={[0, 0.63, 0]} castShadow receiveShadow>
-          <meshStandardMaterial color="#3d2e22" roughness={0.52} />
-        </RoundedBox>
-        <RoundedBox args={[1.32, 0.08, 0.3]} radius={0.015} smoothness={2} position={[0, 0.72, 0.31]} castShadow>
-          <meshStandardMaterial color="#38291e" roughness={0.48} />
-        </RoundedBox>
-        <RoundedBox args={[1.18, 0.028, 0.18]} radius={0.006} smoothness={2} position={[0, 0.768, 0.34]}>
-          <meshStandardMaterial color="#efe6d5" roughness={0.28} />
-        </RoundedBox>
+        <RoomErrorBoundary fallback={null}>
+          <React.Suspense fallback={null}>
+            <SimpleGlbProp
+              url={WESTERN_SALOON_PROP_GLBS.heroPiano}
+              position={[0, 0, 0]}
+              rotation={[0, Math.PI, 0]}
+              scale={1.0}
+            />
+          </React.Suspense>
+        </RoomErrorBoundary>
       </group>
 
       {/* Real Poly Haven Wooden Display Shelves & Performers' Wooden Stools */}
@@ -1631,7 +1636,7 @@ function SaloonArchitectureAndProps({
         </mesh>
       </group>
 
-      {/* 8. Weathered Dark-Wood Bar Counter (Right Background), Brass Register, Leaning Rifle, Barrel (`wine_barrel_01.glb`) & Mottled Tarnished Mirror */}
+      {/* 8. Bespoke Sculpted Mahogany Bar Counter & Backbar Setup */}
       <group
         position={[1.15, 0, -5.15]}
         onClick={(e) => {
@@ -1639,21 +1644,15 @@ function SaloonArchitectureAndProps({
           onInteractHotspot?.('next_track');
         }}
       >
-        <RoundedBox args={[3.85, 1.02, 0.74]} radius={0.03} smoothness={3} position={[0, 0.51, 0]} material={darkTimberMat} castShadow receiveShadow />
-        {barSlats.map((sx, idx) => (
-          <RoundedBox
-            key={idx}
-            args={[0.12, 0.84, 0.04]}
-            radius={0.01}
-            smoothness={2}
-            position={[sx, 0.51, 0.38]}
-            castShadow
-            receiveShadow
-          >
-            <meshStandardMaterial color={idx % 2 === 0 ? '#4a3c2f' : '#574738'} roughness={0.62} />
-          </RoundedBox>
-        ))}
-        <RoundedBox args={[4.0, 0.075, 0.9]} radius={0.025} smoothness={3} position={[0, 1.05, 0.04]} material={saloonWoodMat} castShadow receiveShadow />
+        <RoomErrorBoundary fallback={null}>
+          <React.Suspense fallback={null}>
+            <SimpleGlbProp
+              url={WESTERN_SALOON_PROP_GLBS.heroBar}
+              position={[0, 0, 0]}
+              scale={0.95}
+            />
+          </React.Suspense>
+        </RoomErrorBoundary>
         <AntiqueBrassCashRegister position={[0.58, 1.08, 0.02]} />
       </group>
 

@@ -92,6 +92,22 @@ const CORE_STATIC_ASSET_URLS: string[] = [
   '/models/cafe/props/wooden_stool_01.glb',
   '/models/cafe/props/Chandelier_03.glb',
   '/models/cafe/props/Lantern_01.glb',
+  '/models/cafe/hero/saloon_bar_counter.glb',
+  '/models/cafe/hero/saloon_upright_piano.glb',
+  '/models/cafe/hero/saloon_poker_table.glb',
+  '/models/cafe/hero/saloon_wagon_wheel_chandelier.glb',
+  '/models/party/party_dj_console.glb',
+  '/models/party/party_subwoofer_stack.glb',
+  '/models/party/party_truss_rig.glb',
+  '/models/party/party_vip_booth.glb',
+  '/models/audiobook/audiobook_bookshelf.glb',
+  '/models/audiobook/audiobook_gramophone.glb',
+  '/models/audiobook/audiobook_chesterfield.glb',
+  '/models/podcast/podcast_sm7b_arm.glb',
+  '/models/podcast/podcast_rodecaster.glb',
+  '/models/podcast/podcast_acoustic_diffuser.glb',
+  '/models/concert/concert_stage_drum_kit.glb',
+  '/models/concert/concert_marshall_stack.glb',
   '/models/studio/cassette-deck.glb'
 ];
 

@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
-import { ContactShadows, MeshReflectorMaterial, RoundedBox } from '@react-three/drei';
+import { ContactShadows, MeshReflectorMaterial, RoundedBox, useGLTF } from '@react-three/drei';
+import { DRACO_DECODER_URL } from '../concert/concertAssets';
 import type { RoomLightingFxMode } from '../../prototype/components/SonicRoom3DWorld';
 import {
   DEFAULT_ROOM_LIGHTING_PROFILES,
@@ -32,6 +33,24 @@ import {
 } from '../shared/polyhavenTextures';
 import { assignPeersToCastSlots, PeerOverheadBadge } from '../shared/RoomPeerAvatars';
 import type { RoomPeerParticipant } from '../../types/roomSync';
+
+const LIBRARY_HERO_GLBS = {
+  bookshelf: '/models/audiobook/audiobook_bookshelf.glb',
+  gramophone: '/models/audiobook/audiobook_gramophone.glb',
+  chesterfield: '/models/audiobook/audiobook_chesterfield.glb'
+} as const;
+
+export function preloadLibraryAssets(): void {
+  Object.values(LIBRARY_HERO_GLBS).forEach((url) => {
+    useGLTF.preload(url, DRACO_DECODER_URL);
+  });
+}
+
+function CloneHeroGlb({ url, position, rotation, scale = 1 }: { url: string; position?: [number, number, number]; rotation?: [number, number, number]; scale?: number | [number, number, number] }) {
+  const gltf = useGLTF(url, DRACO_DECODER_URL);
+  const cloned = useMemo(() => gltf.scene.clone(true), [gltf.scene]);
+  return <primitive object={cloned} position={position} rotation={rotation} scale={scale} />;
+}
 
 export const LIBRARY_CAMERA_SPEC: RoomCameraSpec = {
   cinematic: { position: [0, 2.5, 8.2], target: [0, 2.0, -5.5], fov: 60 },
@@ -969,7 +988,9 @@ function LibraryArchitectureAndProps({
         </RoundedBox>
 
         {/* Sculpted Oxblood Leather Chesterfield Armchair */}
-        <SculptedChesterfieldArmchair position={[0, 0.4, -0.1]} />
+        <React.Suspense fallback={null}>
+          <CloneHeroGlb url={LIBRARY_HERO_GLBS.chesterfield} position={[0, 0.4, -0.1]} scale={1.1} />
+        </React.Suspense>
 
         {/* Carved Walnut Lectern + Open Illuminated Manuscript */}
         <group position={[0.64, 0.4, 0.58]} rotation={[0, -0.24, 0]}>
@@ -1041,7 +1062,9 @@ function LibraryArchitectureAndProps({
         <AntiqueTerrestrialGlobe position={[1.42, 0.4, 0.72]} />
 
         {/* 7-Part Antique Brass Acoustic Gramophone Hero Prop */}
-        <AntiqueBrassGramophone position={[1.12, 0.4, 0.02]} isPlaying={isPlaying} isActive={isActive} />
+        <React.Suspense fallback={null}>
+          <CloneHeroGlb url={LIBRARY_HERO_GLBS.gramophone} position={[1.12, 0.4, 0.02]} scale={1.0} />
+        </React.Suspense>
       </group>
 
       <points ref={dustRef} geometry={dustGeo}>

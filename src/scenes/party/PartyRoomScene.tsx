@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
-import { ContactShadows, MeshReflectorMaterial, RoundedBox } from '@react-three/drei';
+import { ContactShadows, MeshReflectorMaterial, RoundedBox, useGLTF } from '@react-three/drei';
+import { DRACO_DECODER_URL } from '../concert/concertAssets';
 import type { RoomLightingFxMode } from '../../prototype/components/SonicRoom3DWorld';
 import {
   DEFAULT_ROOM_LIGHTING_PROFILES,
@@ -36,6 +37,25 @@ import {
 } from '../shared/polyhavenTextures';
 import { assignPeersToCastSlots, PeerOverheadBadge } from '../shared/RoomPeerAvatars';
 import type { RoomPeerParticipant } from '../../types/roomSync';
+
+const PARTY_HERO_GLBS = {
+  djConsole: '/models/party/party_dj_console.glb',
+  subwooferStack: '/models/party/party_subwoofer_stack.glb',
+  trussRig: '/models/party/party_truss_rig.glb',
+  vipBooth: '/models/party/party_vip_booth.glb'
+} as const;
+
+export function preloadPartyAssets(): void {
+  Object.values(PARTY_HERO_GLBS).forEach((url) => {
+    useGLTF.preload(url, DRACO_DECODER_URL);
+  });
+}
+
+function CloneHeroGlb({ url, position, rotation, scale = 1 }: { url: string; position?: [number, number, number]; rotation?: [number, number, number]; scale?: number | [number, number, number] }) {
+  const gltf = useGLTF(url, DRACO_DECODER_URL);
+  const cloned = useMemo(() => gltf.scene.clone(true), [gltf.scene]);
+  return <primitive object={cloned} position={position} rotation={rotation} scale={scale} />;
+}
 
 export const PARTY_CAMERA_SPEC: RoomCameraSpec = {
   cinematic: { position: [0, 2.5, 8.5], target: [0, 2.2, -6.5], fov: 60 },
@@ -186,80 +206,9 @@ function VipBottleServiceBooth({
 }) {
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
-      {/* Plinth Base with Brushed Steel Kickplate */}
-      <RoundedBox args={[2.1, 0.16, 0.84]} radius={0.03} smoothness={3} position={[0, 0.08, 0]} castShadow receiveShadow>
-        <meshStandardMaterial color="#090b0f" roughness={0.38} metalness={0.62} />
-      </RoundedBox>
-      {/* Tufted Piped Seat Cushions */}
-      {[-0.5, 0.5].map((cx) => (
-        <RoundedBox key={cx} args={[0.96, 0.18, 0.78]} radius={0.05} smoothness={4} position={[cx, 0.25, 0.02]} castShadow receiveShadow>
-          <meshPhysicalMaterial color="#11141c" roughness={0.36} sheen={0.55} sheenColor="#64748b" clearcoat={0.32} />
-        </RoundedBox>
-      ))}
-      {/* Channel-Tufted Vertical Leather Backrest Rib Panels */}
-      {[-0.8, -0.4, 0, 0.4, 0.8].map((bx) => (
-        <RoundedBox key={bx} args={[0.37, 0.54, 0.22]} radius={0.055} smoothness={4} position={[bx, 0.56, -0.3]} castShadow receiveShadow>
-          <meshPhysicalMaterial color="#12151e" roughness={0.38} sheen={0.55} sheenColor="#475569" clearcoat={0.28} />
-        </RoundedBox>
-      ))}
-      {/* Sculpted Cocktail Table with Frosted Illuminated Glass Top */}
-      <RoundedBox args={[1.18, 0.36, 0.54]} radius={0.035} smoothness={4} position={[0, 0.18, 0.82]} castShadow receiveShadow>
-        <meshPhysicalMaterial color="#090b10" roughness={0.22} metalness={0.84} clearcoat={0.65} />
-      </RoundedBox>
-      <RoundedBox args={[1.06, 0.018, 0.44]} radius={0.01} smoothness={3} position={[0, 0.368, 0.82]}>
-        <meshPhysicalMaterial
-          color="#e2e8f0"
-          emissive="#f8fafc"
-          emissiveIntensity={0.14}
-          roughness={0.1}
-          clearcoat={1.0}
-          transmission={swGl ? 0 : 0.45}
-          transparent
-          opacity={swGl ? 0.45 : 0.92}
-        />
-      </RoundedBox>
-      {/* Brushed Steel Champagne Ice Bucket */}
-      <group position={[0, 0.46, 0.82]}>
-        <mesh castShadow>
-          <cylinderGeometry args={[0.11, 0.082, 0.18, 20]} />
-          <meshPhysicalMaterial color="#e2e8f0" roughness={0.14} metalness={0.96} anisotropy={0.85} clearcoat={0.6} />
-        </mesh>
-        {/* Refractive Champagne Bottle Inside Bucket */}
-        <group position={[0.015, 0.12, 0]} rotation={[0.12, 0, -0.14]}>
-          <mesh castShadow>
-            <cylinderGeometry args={[0.034, 0.038, 0.17, 16]} />
-            <meshPhysicalMaterial
-              color="#94a3b8"
-              roughness={0.06}
-              metalness={0.05}
-              ior={1.52}
-              clearcoat={1.0}
-              transmission={swGl ? 0 : 0.78}
-              transparent
-              opacity={swGl ? 0.55 : 1}
-            />
-          </mesh>
-          <mesh position={[0, 0.12, 0]}>
-            <cylinderGeometry args={[0.012, 0.022, 0.08, 12]} />
-            <meshStandardMaterial color="#d4af37" metalness={0.95} roughness={0.16} />
-          </mesh>
-        </group>
-      </group>
-      {/* Crystal Rocks Glasses on Table */}
-      {[-0.32, 0.32].map((gx) => (
-        <mesh key={gx} position={[gx, 0.415, 0.84]} castShadow>
-          <cylinderGeometry args={[0.032, 0.026, 0.075, 16]} />
-          <meshPhysicalMaterial
-            color="#f8fafc"
-            roughness={0.04}
-            ior={1.52}
-            clearcoat={1.0}
-            transmission={swGl ? 0 : 0.88}
-            transparent
-            opacity={swGl ? 0.45 : 1}
-          />
-        </mesh>
-      ))}
+      <React.Suspense fallback={null}>
+        <CloneHeroGlb url={PARTY_HERO_GLBS.vipBooth} position={[0, 0, 0]} scale={1.0} />
+      </React.Suspense>
     </group>
   );
 }
@@ -683,35 +632,9 @@ function PartyArchitectureAndLighting({
             onInteractHotspot?.('open_dj');
           }}
         >
-          <RoundedBox args={[3.65, 1.1, 0.88]} radius={0.055} smoothness={4} position={[0, 0.55, 0]} castShadow receiveShadow>
-            <meshPhysicalMaterial color="#06080b" roughness={0.28} metalness={0.82} clearcoat={0.4} />
-          </RoundedBox>
-          <RoundedBox args={[3.72, 0.055, 0.94]} radius={0.02} smoothness={4} position={[0, 1.11, 0]} castShadow receiveShadow material={steelMat} />
-          {/* Beat-Synced Monochrome White Hairline Level Bars */}
-          {eqBars.map((ex, i) => (
-            <RoundedBox
-              key={ex}
-              ref={(el) => {
-                eqBarMeshRefs.current[i] = el;
-              }}
-              args={[0.026, 0.22 + (i % 4) * 0.08, 0.02]}
-              radius={0.004}
-              smoothness={2}
-              position={[ex, 0.55, 0.448]}
-            >
-              <meshStandardMaterial
-                ref={(el) => {
-                  eqBarMatRefs.current[i] = el;
-                }}
-                color="#cbd5e1"
-                emissive="#ffffff"
-                emissiveIntensity={0.28}
-              />
-            </RoundedBox>
-          ))}
-          {[-1.22, -0.62, 0.62, 1.22].map((dx) => (
-            <PioneerCDJDeck key={dx} position={[dx, 1.16, 0.04]} />
-          ))}
+          <React.Suspense fallback={null}>
+            <CloneHeroGlb url={PARTY_HERO_GLBS.djConsole} position={[0, 0, 0]} scale={1.2} />
+          </React.Suspense>
           {/* Sculpted Over-Ear DJ Headphones Resting Beside Mixer */}
           <StudioDJHeadphones position={[-0.3, 1.158, 0.24]} rotationY={0.52} />
           <group position={[0, 1.16, 0.04]}>
@@ -780,33 +703,9 @@ function PartyArchitectureAndLighting({
       ))}
       {[-4.5, 4.5].map((sx) => (
         <group key={sx} position={[sx, 0, -7.2]} rotation={[0, sx < 0 ? 0.25 : -0.25, 0]}>
-          {[0.42, 1.28, 2.14, 3.0].map((sy) => (
-            <group key={sy} position={[0, sy, 0]}>
-              <RoundedBox args={[0.96, 0.8, 0.78]} radius={0.035} smoothness={4} castShadow receiveShadow>
-                <meshStandardMaterial color="#08090d" roughness={0.62} metalness={0.28} />
-              </RoundedBox>
-              <mesh position={[0, 0, 0.395]}>
-                <planeGeometry args={[0.84, 0.68]} />
-                <meshStandardMaterial map={speakerGrille} color="#1e2430" roughness={0.55} metalness={0.7} />
-              </mesh>
-              {[-0.2, 0.2].map((wx) => (
-                <group key={wx} position={[wx, 0, 0.398]}>
-                  <mesh>
-                    <ringGeometry args={[0.09, 0.175, 24]} />
-                    <meshStandardMaterial color="#1e293b" metalness={0.88} roughness={0.28} />
-                  </mesh>
-                  <mesh position={[0, 0, -0.012]} rotation={[Math.PI / 2, 0, 0]}>
-                    <cylinderGeometry args={[0.036, 0.135, 0.038, 20, 1, true]} />
-                    <meshStandardMaterial color="#0b0e14" roughness={0.48} metalness={0.25} side={THREE.DoubleSide} />
-                  </mesh>
-                  <mesh position={[0, 0, -0.005]}>
-                    <sphereGeometry args={[0.04, 16, 12, 0, Math.PI * 2, 0, Math.PI * 0.5]} />
-                    <meshStandardMaterial color="#090b0f" roughness={0.22} metalness={0.8} />
-                  </mesh>
-                </group>
-              ))}
-            </group>
-          ))}
+          <React.Suspense fallback={null}>
+            <CloneHeroGlb url={PARTY_HERO_GLBS.subwooferStack} position={[0, 0, 0]} scale={1.2} />
+          </React.Suspense>
         </group>
       ))}
 

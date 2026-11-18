@@ -46,6 +46,9 @@ export const PODCAST_HDR_PUBLIC_PATH = '/public/hdr/studio_small_08_1k.hdr';
 export const PODCAST_STUDIO_GLB_PUBLIC_PATH = '/public/models/podcast/podcast-studio.glb';
 export const PODCAST_HOSTS_GLB_PUBLIC_PATH = '/public/models/podcast/hosts.glb';
 export const PODCAST_COHOST_GLB_PUBLIC_PATH = '/public/models/podcast/cohost.glb';
+export const PODCAST_HERO_SM7B_PUBLIC_PATH = '/public/models/podcast/podcast_sm7b_arm.glb';
+export const PODCAST_HERO_RODE_PUBLIC_PATH = '/public/models/podcast/podcast_rodecaster.glb';
+export const PODCAST_HERO_DIFFUSER_PUBLIC_PATH = '/public/models/podcast/podcast_acoustic_diffuser.glb';
 
 function resolvePublicUrl(publicPath: string): string {
   return publicPath.replace(/^\/public\//, '/');
@@ -55,6 +58,15 @@ const PODCAST_HDR_URL = resolvePublicUrl(PODCAST_HDR_PUBLIC_PATH);
 const PODCAST_STUDIO_GLB_URL = resolvePublicUrl(PODCAST_STUDIO_GLB_PUBLIC_PATH);
 const PODCAST_HOSTS_GLB_URL = resolvePublicUrl(PODCAST_HOSTS_GLB_PUBLIC_PATH);
 const PODCAST_COHOST_GLB_URL = resolvePublicUrl(PODCAST_COHOST_GLB_PUBLIC_PATH);
+const PODCAST_HERO_SM7B_URL = resolvePublicUrl(PODCAST_HERO_SM7B_PUBLIC_PATH);
+const PODCAST_HERO_RODE_URL = resolvePublicUrl(PODCAST_HERO_RODE_PUBLIC_PATH);
+const PODCAST_HERO_DIFFUSER_URL = resolvePublicUrl(PODCAST_HERO_DIFFUSER_PUBLIC_PATH);
+
+function CloneHeroGlb({ url, position, rotation, scale = 1 }: { url: string; position?: [number, number, number]; rotation?: [number, number, number]; scale?: number | [number, number, number] }) {
+  const gltf = useGLTF(url, DRACO_DECODER_URL);
+  const cloned = useMemo(() => gltf.scene.clone(true), [gltf.scene]);
+  return <primitive object={cloned} position={position} rotation={rotation} scale={scale} />;
+}
 
 const configureMeshopt = (loader: { setMeshoptDecoder?: (decoder: typeof MeshoptDecoder) => void }) => {
   if (typeof loader.setMeshoptDecoder === 'function') {
@@ -907,62 +919,9 @@ function BroadcastBoomMic({
 }) {
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
-      {/* Weighted Anodized Desk C-Clamp & Swivel Turret */}
-      <mesh position={[0, 0.032, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.04, 0.046, 0.064, 20]} />
-        <meshStandardMaterial color="#14161c" metalness={0.9} roughness={0.22} />
-      </mesh>
-      <mesh position={[0, 0.072, 0]} castShadow>
-        <cylinderGeometry args={[0.022, 0.026, 0.028, 16]} />
-        <meshStandardMaterial color="#c89d42" metalness={0.92} roughness={0.18} />
-      </mesh>
-      {/* Lower Parallelogram Scissor Arm */}
-      <RoundedBox
-        args={[0.024, 0.36, 0.028]}
-        radius={0.008}
-        smoothness={3}
-        position={[0, 0.21, -0.09]}
-        rotation={[-0.45, 0, 0]}
-        castShadow
-      >
-        <meshStandardMaterial color="#181c26" metalness={0.88} roughness={0.24} />
-      </RoundedBox>
-      {/* Chrome Tension Spring & Brass Elbow Thumbscrew */}
-      <mesh position={[0, 0.35, -0.16]} rotation={[0, 0, Math.PI / 2]} castShadow>
-        <cylinderGeometry args={[0.018, 0.018, 0.044, 14]} />
-        <meshStandardMaterial color="#d4af37" metalness={0.92} roughness={0.2} />
-      </mesh>
-      {/* Upper Parallelogram Boom Arm */}
-      <RoundedBox
-        args={[0.022, 0.33, 0.024]}
-        radius={0.007}
-        smoothness={3}
-        position={[0, 0.4, -0.02]}
-        rotation={[0.7, 0, 0]}
-        castShadow
-      >
-        <meshStandardMaterial color="#181c26" metalness={0.88} roughness={0.24} />
-      </RoundedBox>
-      {/* Shure SM7B Yoke Bracket + Shockmount Ring */}
-      <mesh position={[0, 0.415, 0.13]} rotation={[Math.PI / 2.15, 0, 0]} castShadow>
-        <torusGeometry args={[0.042, 0.005, 10, 24]} />
-        <meshStandardMaterial color="#94a3b8" metalness={0.9} roughness={0.22} />
-      </mesh>
-      {/* Shure SM7B Broadcast Dynamic Capsule Body */}
-      <mesh position={[0, 0.41, 0.15]} rotation={[Math.PI / 2.15, 0, 0]} castShadow>
-        <cylinderGeometry args={[0.032, 0.034, 0.145, 24]} />
-        <meshStandardMaterial color="#0f131a" metalness={0.82} roughness={0.28} />
-      </mesh>
-      {/* Glowing Red On-Air Mic Tally Ring */}
-      <mesh position={[0, 0.412, 0.11]} rotation={[Math.PI / 2.15, 0, 0]}>
-        <torusGeometry args={[0.033, 0.0035, 8, 24]} />
-        <meshStandardMaterial color="#ff2a2a" emissive="#ff2a2a" emissiveIntensity={0.85} />
-      </mesh>
-      {/* High-Density Acoustic Foam Windscreen */}
-      <mesh position={[0, 0.4, 0.225]} rotation={[Math.PI / 2.15, 0, 0]} castShadow>
-        <capsuleGeometry args={[0.034, 0.042, 12, 20]} />
-        <meshStandardMaterial color="#18191e" roughness={0.9} metalness={0.04} />
-      </mesh>
+      <React.Suspense fallback={null}>
+        <CloneHeroGlb url={PODCAST_HERO_SM7B_URL} position={[0, 0, 0]} scale={1.0} />
+      </React.Suspense>
     </group>
   );
 }
@@ -2024,39 +1983,9 @@ function PodcastArchitectureAndProps({
 
         {/* RØDECaster Pro II Broadcast Console with 8 Motorized Faders & RGB Pads */}
         <group position={[0, 0.768, 0.1]}>
-          <RoundedBox args={[0.44, 0.042, 0.3]} radius={0.012} smoothness={4} castShadow receiveShadow>
-            <meshStandardMaterial color="#0f141d" roughness={0.28} metalness={0.85} />
-          </RoundedBox>
-          {/* Tilted Touchscreen Display */}
-          <mesh position={[-0.05, 0.024, -0.07]} rotation={[-Math.PI / 2 + 0.1, 0, 0]}>
-            <planeGeometry args={[0.24, 0.085]} />
-            <meshStandardMaterial color="#0284c7" emissive="#0284c7" emissiveIntensity={0.38} roughness={0.3} />
-          </mesh>
-          {/* 6 Physical Fader Caps */}
-          {[-0.16, -0.11, -0.06, -0.01, 0.04, 0.09].map((fx) => (
-            <RoundedBox
-              key={fx}
-              args={[0.018, 0.016, 0.032]}
-              radius={0.004}
-              smoothness={2}
-              position={[fx, 0.026, 0.05]}
-              castShadow
-            >
-              <meshStandardMaterial color="#e2e8f0" metalness={0.9} roughness={0.2} />
-            </RoundedBox>
-          ))}
-          {/* 8 Tactile Sound Pads */}
-          {[0.14, 0.18].map((px, cIdx) =>
-            [-0.04, 0.0, 0.04, 0.08].map((pz, rIdx) => (
-              <mesh
-                key={`${px}-${pz}`}
-                position={[px, 0.023, pz]}
-                material={(cIdx + rIdx) % 2 === 0 ? padAmberMat : padEmeraldMat}
-              >
-                <boxGeometry args={[0.028, 0.008, 0.028]} />
-              </mesh>
-            ))
-          )}
+          <React.Suspense fallback={null}>
+            <CloneHeroGlb url={PODCAST_HERO_RODE_URL} position={[0, 0, 0]} scale={1.2} />
+          </React.Suspense>
         </group>
 
         {/* Sleek Aluminum Show-Notes Laptop in front of Lead Host */}

@@ -28,6 +28,17 @@ import { usePolyHavenPBR } from '../shared/polyhavenTextures';
 import { assignPeersToCastSlots, PeerOverheadBadge, type AssignedCastPeer } from '../shared/RoomPeerAvatars';
 import type { RoomPeerParticipant } from '../../types/roomSync';
 
+const CONCERT_HERO_GLBS = {
+  drumKit: '/models/concert/concert_stage_drum_kit.glb',
+  marshallStack: '/models/concert/concert_marshall_stack.glb'
+} as const;
+
+function CloneHeroGlb({ url, position, rotation, scale = 1 }: { url: string; position?: [number, number, number]; rotation?: [number, number, number]; scale?: number | [number, number, number] }) {
+  const gltf = useGLTF(url, DRACO_DECODER_URL);
+  const cloned = useMemo(() => gltf.scene.clone(true), [gltf.scene]);
+  return <primitive object={cloned} position={position} rotation={rotation} scale={scale} />;
+}
+
 interface ConcertHallSceneProps {
   isPlaying: boolean;
   bpm: number;
@@ -2163,6 +2174,10 @@ function TheaterArchitectureAndStage({
           <boxGeometry args={[3.22, 0.035, 0.025]} />
           <meshStandardMaterial color="#2a2f3d" metalness={0.88} roughness={0.22} />
         </mesh>
+        {/* Sculpted Hero Drum Kit on Riser */}
+        <Suspense fallback={null}>
+          <CloneHeroGlb url={CONCERT_HERO_GLBS.drumKit} position={[0, 0.175, 0]} scale={1.0} />
+        </Suspense>
       </group>
 
       {/* Stacked Marshall-Style Guitar Amp Cabinets on Stage Left & Stage Right */}
@@ -2172,41 +2187,9 @@ function TheaterArchitectureAndStage({
           position={[ax, STAGE_SURFACE_Y, -7.8]}
           rotation={[0, ax < 0 ? 0.28 : -0.28, 0]}
         >
-          {[-0.44, 0.44].map((offsetX) => (
-            <group key={offsetX} position={[offsetX, 0, 0]}>
-              {/* Lower 4x12 straight cabinet */}
-              <mesh position={[0, 0.38, 0]} castShadow>
-                <boxGeometry args={[0.78, 0.76, 0.42]} />
-                <meshStandardMaterial color="#0a0b0f" roughness={0.78} metalness={0.14} />
-              </mesh>
-              <mesh position={[0, 0.38, 0.214]}>
-                <planeGeometry args={[0.7, 0.68]} />
-                <meshStandardMaterial map={speakerGrilleTex} color="#272932" roughness={0.68} metalness={0.35} />
-              </mesh>
-              {/* Upper 4x12 angled cabinet */}
-              <mesh position={[0, 1.14, 0]} castShadow>
-                <boxGeometry args={[0.78, 0.74, 0.38]} />
-                <meshStandardMaterial color="#0a0b0f" roughness={0.78} metalness={0.14} />
-              </mesh>
-              <mesh position={[0, 1.14, 0.194]}>
-                <planeGeometry args={[0.7, 0.66]} />
-                <meshStandardMaterial map={speakerGrilleTex} color="#272932" roughness={0.68} metalness={0.35} />
-              </mesh>
-              {/* Tube Amp Head with Brushed Gold Faceplate */}
-              <mesh position={[0, 1.66, 0]} castShadow>
-                <boxGeometry args={[0.74, 0.28, 0.34]} />
-                <meshStandardMaterial color="#0c0d12" roughness={0.55} metalness={0.45} />
-              </mesh>
-              <mesh position={[0, 1.62, 0.174]}>
-                <boxGeometry args={[0.66, 0.08, 0.01]} />
-                <meshStandardMaterial color="#d4af37" roughness={0.22} metalness={0.92} />
-              </mesh>
-              <mesh position={[0.26, 1.62, 0.181]}>
-                <sphereGeometry args={[0.012, 8, 8]} />
-                <meshStandardMaterial color="#ff4444" emissive="#ff3333" emissiveIntensity={1.2} />
-              </mesh>
-            </group>
-          ))}
+          <Suspense fallback={null}>
+            <CloneHeroGlb url={CONCERT_HERO_GLBS.marshallStack} position={[0, 0, 0]} scale={1.05} />
+          </Suspense>
         </group>
       ))}
 
